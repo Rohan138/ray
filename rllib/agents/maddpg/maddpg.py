@@ -124,7 +124,7 @@ DEFAULT_CONFIG = with_common_config({
 # fmt: on
 
 
-def before_learn_on_batch(multi_agent_batch, policies, train_batch_size):
+def before_learn_on_batch(multi_agent_batch, policies, train_batch_size, framework):
     samples = {}
 
     # Modify keys.
@@ -135,16 +135,28 @@ def before_learn_on_batch(multi_agent_batch, policies, train_batch_size):
         samples.update(dict(zip(keys, multi_agent_batch.policy_batches[pid].values())))
 
     # Make ops and feed_dict to get "new_obs" from target action sampler.
-    new_obs_ph_n = [p.new_obs_ph for p in policies.values()]
     new_obs_n = list()
+    new_act_n = list()
     for k, v in samples.items():
         if "new_obs" in k:
             new_obs_n.append(v)
-
-    for i, p in enumerate(policies.values()):
-        feed_dict = {new_obs_ph_n[i]: new_obs_n[i]}
-        new_act = p.get_session().run(p.target_act_sampler, feed_dict)
-        samples.update({"new_actions_%d" % i: new_act})
+    
+    if framework=="torch":
+        def sampler(policy, obs):
+            model_out, _ = policy.target_model({"obs": obs}, [], None)
+            return policy.target_model.get_policy_output(model_out)
+        new_act_n = [
+            sampler(policy, obs) for policy, obs in zip(policies.values(), new_obs_n)
+        ]
+    else:
+        for i, p in enumerate(policies.values()):
+            feed_dict = {p.new_obs_ph: new_obs_n[i]}
+            new_act = p.get_session().run(p.target_act_sampler, feed_dict)
+            new_act_n.append(new_act)
+    
+    samples.update(
+        {"new_actions_%d" % i: new_act for i, new_act in enumerate(new_act_n)}
+    )   
 
     # Share samples among agents.
     policy_batches = {pid: SampleBatch(samples) for pid in policies.keys()}
@@ -171,10 +183,16 @@ class MADDPGTrainer(DQNTrainer):
             policies = dict(
                 workers.local_worker().foreach_policy_to_train(lambda p, i: (i, p))
             )
-            return before_learn_on_batch(batch, policies, config["train_batch_size"])
+            return before_learn_on_batch(
+                batch, policies, config["train_batch_size"], config["framework"]
+            )
 
         config["before_learn_on_batch"] = f
 
     @override(DQNTrainer)
     def get_default_policy_class(self, config: TrainerConfigDict) -> Type[Policy]:
-        return MADDPGTFPolicy
+        if config["framework"] == "torch":
+            from ray.rllib.agents.maddpg.maddpg_torch_policy import MADDPGTorchPolicy
+            return MADDPGTorchPolicy
+        else:
+            return MADDPGTFPolicy
