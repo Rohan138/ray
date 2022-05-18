@@ -156,6 +156,15 @@ class OffPolicyEstimator:
         self.new_estimates = []
         return out
 
+    @DeveloperAPI
+    def train_q(self, batch: SampleBatchType) -> OffPolicyEstimate:
+        """For algorithms that fit a Q-function given a batch of offline data.
+
+        Override this method if the estimator uses a Q-function.
+        See the direct_method and doubly_robust estimators for an example.
+        """
+        raise NotImplementedError
+
     @Deprecated(new="OffPolicyEstimator.create_from_io_context", error=False)
     def create(self, *args, **kwargs):
         return self.create_from_io_context(*args, **kwargs)

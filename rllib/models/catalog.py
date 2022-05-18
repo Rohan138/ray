@@ -635,7 +635,7 @@ class ModelCatalog:
                         raise e
             else:
                 raise NotImplementedError(
-                    "`framework` must be 'tf2|tf|tfe|torch', but is "
+                    "`framework` must be 'jax|tf2|tf|tfe|torch', but is "
                     "{}!".format(framework)
                 )
 
