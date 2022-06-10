@@ -340,7 +340,10 @@ class TestTrainer(unittest.TestCase):
                     "action_space": None,  # Test, whether this is inferred.
                 },
             )
-            .offline_data(input_=[input_file])
+            .offline_data(
+                input_="dataset",
+                input_config={"format": "json", "path": input_file},
+            )
         )
 
         bc_trainer = BC(config=offline_rl_config)

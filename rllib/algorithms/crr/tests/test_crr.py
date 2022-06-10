@@ -37,7 +37,11 @@ class TestCRR(unittest.TestCase):
             CRRConfig()
             .environment(env="Pendulum-v1", clip_actions=True)
             .framework("torch")
-            .offline_data(input_=[data_file], actions_in_input_normalized=True)
+            .offline_data(
+                input_="dataset",
+                input_config={"format": "json", "path": data_file},
+                actions_in_input_normalized=True,
+            )
             .training(
                 twin_q=True,
                 train_batch_size=256,

@@ -65,10 +65,6 @@ class CQLConfig(SACConfig):
         self.lagrangian_thresh = 5.0
         self.min_q_weight = 5.0
 
-        # Changes to Trainer's/SACConfig's default:
-        # .offline_data()
-        self.off_policy_estimation_methods = {}
-
         # .reporting()
         self.min_sample_timesteps_per_iteration = 0
         self.min_train_timesteps_per_iteration = 100

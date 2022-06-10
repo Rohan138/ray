@@ -43,7 +43,10 @@ class TestBC(unittest.TestCase):
                 evaluation_parallel_to_training=True,
                 evaluation_config={"input": "sampler"},
             )
-            .offline_data(input_=[data_file])
+            .offline_data(
+                input_="dataset",
+                input_config={"format": "json", "path": data_file},
+            )
         )
         num_iterations = 350
         min_reward = 75.0

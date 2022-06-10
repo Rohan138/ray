@@ -55,7 +55,10 @@ class TestMARWIL(unittest.TestCase):
                 evaluation_parallel_to_training=True,
                 evaluation_config={"input": "sampler"},
             )
-            .offline_data(input_=[data_file])
+            .offline_data(
+                input_="dataset",
+                input_config={"format": "json", "path": data_file},
+            )
         )
 
         num_iterations = 350
@@ -118,8 +121,9 @@ class TestMARWIL(unittest.TestCase):
             )
             .offline_data(
                 # Learn from offline data.
-                input_=[data_file],
-                off_policy_estimation_methods=[],
+                input_="dataset",
+                input_config={"format": "json", "path": data_file},
+                off_policy_estimation_methods={},
             )
         )
 
@@ -147,7 +151,10 @@ class TestMARWIL(unittest.TestCase):
         config = (
             marwil.MARWILConfig()
             .rollouts(num_rollout_workers=0)
-            .offline_data(input_=[data_file])
+            .offline_data(
+                input_="dataset",
+                input_config={"format": "json", "path": data_file},
+            )
         )  # Learn from offline data.
 
         for fw, sess in framework_iterator(config, session=True):
