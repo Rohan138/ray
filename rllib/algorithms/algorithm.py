@@ -46,6 +46,7 @@ from ray.rllib.execution.common import WORKER_UPDATE_TIMER
 from ray.rllib.execution.rollout_ops import synchronous_parallel_sample
 from ray.rllib.execution.train_ops import multi_gpu_train_one_step, train_one_step
 from ray.rllib.offline import get_offline_io_resource_bundles
+from ray.rllib.offline.dataset_writer import DatasetWriter
 from ray.rllib.offline.estimators.off_policy_estimator import train_test_split
 from ray.rllib.policy.policy import Policy
 from ray.rllib.policy.sample_batch import DEFAULT_POLICY_ID, SampleBatch
@@ -697,6 +698,10 @@ class Algorithm(Trainable):
 
             fn = functools.partial(fn, task_fn=self.config["env_task_fn"])
             self.workers.foreach_env_with_context(fn)
+
+        # If output writer is a DatasetWriter, flush output buffer
+        if isinstance(self.workers.local_worker().output_writer, DatasetWriter):
+            self.workers.local_worker().output_writer.flush()
 
         return result
 
