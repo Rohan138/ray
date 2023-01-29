@@ -137,6 +137,15 @@ class TestBandits(unittest.TestCase):
                 # have been explored enough
                 check(arm_means[-1][best_arm], best_arm_prob, decimals=1)
 
+    def test_bandit_bts_compilation():
+        pass
+
+    def test_bandit_klucb_compilation():
+        pass
+
+    def test_bernoulli_bandit_convergence():
+        pass
+
 
 if __name__ == "__main__":
     import pytest

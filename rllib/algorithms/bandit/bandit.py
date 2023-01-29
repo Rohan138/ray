@@ -83,6 +83,53 @@ class BanditLinUCBConfig(BanditConfig):
         # fmt: on
 
 
+class BanditKLUCBConfig(BanditConfig):
+    """Defines a configuration class from which a KL-UCB bandit can be built.
+
+    Example:
+        >>> from ray.rllib.algorithms.bandit import BanditKLUCBConfig # doctest: +SKIP
+        >>> from ray.rllib.examples.env.bandit_envs_discrete import BernoulliBanditEnv
+        >>> config = BanditKLUCBConfig().rollouts(num_rollout_workers=4)# doctest: +SKIP
+        >>> print(config.to_dict())  # doctest: +SKIP
+        >>> # Build a Algorithm object from the config and run 1 training iteration.
+        >>> algo = config.build(env=BernoulliBanditEnv)  # doctest: +SKIP
+        >>> algo.train()  # doctest: +SKIP
+    """
+
+    def __init__(self):
+        super().__init__(algo_class=BanditKLUCB)
+        # fmt: off
+        # __sphinx_doc_begin__
+        # Override some of AlgorithmConfig's default values with bandit-specific values.
+        self.exploration_config = {"type": "KLUpperConfidenceBound"}
+        # __sphinx_doc_end__
+        # fmt: on
+
+
+class BanditBTSConfig(BanditConfig):
+    """Defines a configuration class from which a Binomial Thompson-sampling bandit
+    can be built.
+
+    Example:
+        >>> from ray.rllib.algorithms.bandit import BanditBTSConfig # doctest: +SKIP
+        >>> from ray.rllib.examples.env.bandit_envs_discrete import BernoulliBanditEnv
+        >>> config = BanditBTSConfig().rollouts(num_rollout_workers=4)# doctest: +SKIP
+        >>> print(config.to_dict())  # doctest: +SKIP
+        >>> # Build a Algorithm object from the config and run 1 training iteration.
+        >>> algo = config.build(env=BernoulliBanditEnv)  # doctest: +SKIP
+        >>> algo.train()  # doctest: +SKIP
+    """
+
+    def __init__(self):
+        super().__init__(algo_class=BanditBTS)
+        # fmt: off
+        # __sphinx_doc_begin__
+        # Override some of AlgorithmConfig's default values with bandit-specific values.
+        self.exploration_config = {"type": "BinomialThompsonSampling"}
+        # __sphinx_doc_end__
+        # fmt: on
+
+
 class BanditLinTS(Algorithm):
     """Bandit Algorithm using ThompsonSampling exploration."""
 
@@ -121,6 +168,36 @@ class BanditLinUCB(Algorithm):
             return BanditTFPolicy
         else:
             raise NotImplementedError("Only `framework=[torch|tf2]` supported!")
+
+
+class BanditKLUCB(Algorithm):
+    @classmethod
+    @override(Algorithm)
+    def get_default_config(cls) -> BanditKLUCBConfig:
+        return BanditKLUCBConfig()
+
+    @classmethod
+    @override(Algorithm)
+    def get_default_policy_class(
+        cls, config: AlgorithmConfig
+    ) -> Optional[Type[Policy]]:
+        raise NotImplementedError("TODO: Rohan138")
+
+
+class BanditBTS(Algorithm):
+    """Bandit Algorithm using Binomial Thompson Sampling."""
+
+    @classmethod
+    @override(Algorithm)
+    def get_default_config(cls) -> BanditBTSConfig:
+        return BanditBTSConfig()
+
+    @classmethod
+    @override(Algorithm)
+    def get_default_policy_class(
+        cls, config: AlgorithmConfig
+    ) -> Optional[Type[Policy]]:
+        raise NotImplementedError("TODO: Rohan138")
 
 
 # Deprecated: Use ray.rllib.algorithms.bandit.BanditLinUCBConfig instead!

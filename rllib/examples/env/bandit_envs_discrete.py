@@ -204,3 +204,36 @@ class WheelBanditEnv(gym.Env):
 
     def render(self, mode="human"):
         raise NotImplementedError
+
+
+class BernoulliBanditEnv(gym.Env):
+    """Simple Bernoulli bandit env w/ 2 states and 3 actions (arms): 0, 1, and 2.
+
+    Episodes last only for one timestep, possible observations are:
+    [-1.0, 1.0] and [1.0, -1.0], where the first element is the "current context".
+    A reward of 1.0 is received for selecting arm 0 for context=1.0
+    and arm 2 for context=-1.0. All other actions yield 0.0 reward.
+    """
+
+    def __init__(self, config=None):
+        self.action_space = Discrete(3)
+        self.observation_space = Box(low=-1.0, high=1.0, shape=(2,))
+        self.cur_context = None
+
+    def reset(self, *, seed=None, options=None):
+        self.cur_context = random.choice([-1.0, 1.0])
+        return np.array([self.cur_context, -self.cur_context]), {}
+
+    def step(self, action):
+        rewards_for_context = {
+            -1.0: [0.0, 0.0, 1.0],
+            1.0: [1.0, 0.0, 0.0],
+        }
+        reward = rewards_for_context[self.cur_context][action]
+        return (
+            np.array([-self.cur_context, self.cur_context]),
+            reward,
+            True,
+            False,
+            {"regret": 1 - reward},
+        )
