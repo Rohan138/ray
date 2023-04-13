@@ -21,7 +21,9 @@ class TorchDistributionWrapper(ActionDistribution):
     """Wrapper class for torch.distributions."""
 
     @override(ActionDistribution)
-    def __init__(self, inputs: List[TensorType], model: TorchModelV2):
+    def __init__(
+        self, inputs: Union[TensorType, List[TensorType]], model: TorchModelV2
+    ):
         # If inputs are not a torch Tensor, make them one and make sure they
         # are on the correct device.
         if not isinstance(inputs, torch.Tensor):
